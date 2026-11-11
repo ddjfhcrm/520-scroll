@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>520顆愛意 · 點一句，成一箋</title>
+<meta name="description" content="五百二十句溫柔，每一句都能單獨點開、單獨送人。" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%93%83</text></svg>" />
+<style>
+  :root{
+    --paper:#f7eedd;
+    --ink:#2f2723;
+    --ink-soft:#6f5d4c;
+    --cinnabar:#a8352a;
+    --line:rgba(120,92,50,.13);
+    --kai:"KaiTi","Kaiti SC","STKaiti","SimSun",serif;
+    --song:"SimSun","Songti SC","Noto Serif SC",serif;
+    --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  body{
+    min-height:100%;
+    background:radial-gradient(120% 80% at 50% -10%, #fdf7ea 0%, #f7eedd 45%, #f1e5cf 100%);
+    color:var(--ink);
+    font-family:var(--kai);
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.05'/></svg>");
+  }
+
+  #fx{
+    position:fixed; inset:0; width:100%; height:100%;
+    pointer-events:none; z-index:25;
+  }
+
+  .wrap{ position:relative; z-index:1; width:min(720px,100%); margin:0 auto; padding:0 20px 90px; }
+
+  header{ padding:clamp(38px,7vh,76px) 4px 0; text-align:center; }
+  .kicker{
+    margin:0; font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:10px; letter-spacing:.42em; text-indent:.42em; color:#c39a92;
+  }
+  h1{
+    margin:12px 0 0; font-family:var(--song); font-weight:600;
+    font-size:clamp(24px,4vw,34px); letter-spacing:.16em; text-indent:.16em; color:#43272a;
+  }
+  .sub{ margin:12px 0 0; font-size:13.5px; letter-spacing:.12em; color:#9a7a70; }
+  .rule{
+    margin:26px auto 0; width:min(560px,100%); height:1px;
+    background:linear-gradient(90deg, transparent, rgba(120,92,50,.28), transparent);
+  }
+
+  .tools{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; gap:10px;
+    padding:14px 0 12px;
+    background:linear-gradient(to bottom, #f8efe0 62%, rgba(248,239,224,0));
+    backdrop-filter:blur(4px);
+  }
+  .search{
+    flex:1; display:flex; align-items:center; gap:8px;
+    background:rgba(255,252,246,.9);
+    border:1px solid var(--line); border-radius:999px; padding:9px 15px;
+  }
+  .search input{
+    flex:1; min-width:0; border:0; outline:0; background:transparent;
+    font-family:var(--kai); font-size:14.5px; color:var(--ink); letter-spacing:.04em;
+  }
+  .search input::placeholder{ color:#bfa294; }
+  .tools button{
+    flex:0 0 auto; font-family:var(--kai); font-size:13px; letter-spacing:.1em;
+    color:#6d3b42; padding:9px 15px; border-radius:999px; cursor:pointer;
+    background:rgba(255,252,246,.9); border:1px solid var(--line);
+    transition:background .2s, color .2s, transform .18s;
+  }
+  .tools button:hover{ background:#fff; color:#952f24; transform:translateY(-1px); }
+  .tools button:focus-visible{ outline:2px solid #d99aa0; outline-offset:2px; }
+
+  ol.list{ list-style:none; margin:0; padding:0; }
+  ol.list li{ margin:0; }
+  .row{
+    width:100%; display:grid; grid-template-columns:58px 1fr 18px; align-items:baseline; gap:12px;
+    padding:11px 8px; border:0; background:transparent; cursor:pointer;
+    border-bottom:1px solid var(--line);
+    font-family:var(--kai); font-size:16.5px; line-height:1.6; letter-spacing:.03em;
+    color:#3a2d27; text-align:left;
+    transition:background .18s, color .18s, padding-left .18s;
+  }
+  .row .no{ font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#bd927f; transition:color .18s; }
+  .row .tx{ text-wrap:pretty; }
+  .row .go{ font-size:12px; color:transparent; transition:color .18s, transform .18s; }
+  .row:hover, .row:focus-visible{ background:rgba(255,255,255,.62); padding-left:14px; outline:0; }
+  .row:hover .no, .row:focus-visible .no{ color:var(--cinnabar); }
+  .row:hover .go, .row:focus-visible .go{ color:#c98a7c; transform:translateX(2px); }
+  .row.is-cur{ background:rgba(246,222,214,.55); }
+  .row.is-cur .no{ color:var(--cinnabar); }
+  .row.tap{ animation:tapPulse .45s ease; }
+  @keyframes tapPulse{
+    0%{ background:rgba(168,53,42,.16); }
+    100%{ background:rgba(246,222,214,.55); }
+  }
+  .empty{ padding:40px 8px; color:#a9907f; font-size:14px; letter-spacing:.1em; text-align:center; }
+
+  /* ---------- 箋 ---------- */
+  .card-wrap{
+    position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:20px;
+  }
+  .card-wrap[hidden]{ display:none; }
+  .backdrop{
+    position:absolute; inset:0; z-index:0;
+    background:rgba(58,34,26,.30);
+    -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+    animation:fade .24s ease;
+  }
+  @keyframes fade{ from{ opacity:0; } }
+
+  .card{
+    position:relative; z-index:2; width:min(560px,100%);
+    background:linear-gradient(180deg,#fffdf7,#fdf6e8);
+    border:1px solid rgba(180,140,100,.3);
+    border-radius:18px;
+    padding:44px 34px 24px;
+    box-shadow:0 30px 70px rgba(90,50,35,.28), inset 0 1px 0 rgba(255,255,255,.9);
+    opacity:0;
+    transform:translateY(12px) scale(.965);
+    filter:blur(4px);
+  }
+  /* 花瓣落下來之後，箋慢慢浮出 */
+  .card-wrap.ready .card{
+    animation:emerge .58s cubic-bezier(.2,.85,.3,1) forwards;
+  }
+  @keyframes emerge{
+    0%{ opacity:0; transform:translateY(12px) scale(.965); filter:blur(4px); }
+    55%{ opacity:.9; filter:blur(.6px); }
+    100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+  }
+  /* 正文逐字浮現 */
+  .card-text .ch{ opacity:0; animation:chIn .5s ease forwards; }
+  @keyframes chIn{
+    from{ opacity:0; filter:blur(3px); }
+    to{ opacity:1; filter:blur(0); }
+  }
+  .card::before{
+    content:""; position:absolute; inset:9px; border:1px solid rgba(168,53,42,.16); border-radius:12px; pointer-events:none;
+  }
+  .seal{
+    position:absolute; left:26px; top:-18px;
+    width:52px; height:52px; display:grid; place-items:center;
+    background:var(--cinnabar); color:#fdf3e4; border-radius:5px;
+    font-family:var(--mono); font-size:13px; letter-spacing:.02em;
+    box-shadow:0 6px 18px rgba(140,50,35,.28), inset 0 0 0 2px rgba(255,240,225,.3);
+    transform:rotate(-3deg);
+  }
+  /* 最後蓋下印章 */
+  .card-wrap.ready .seal{
+    animation:stamp .44s cubic-bezier(.2,1.55,.4,1) .62s both;
+  }
+  @keyframes stamp{
+    0%{ transform:rotate(-3deg) scale(1.9); opacity:0; }
+    55%{ opacity:1; }
+    100%{ transform:rotate(-3deg) scale(1); opacity:1; }
+  }
+  .card-text{
+    margin:0; font-family:var(--kai);
+    font-size:clamp(20px,3.4vw,27px); line-height:1.85; letter-spacing:.05em;
+    color:#33251f; text-align:center; text-wrap:balance; min-height:2em;
+  }
+  .card-meta{
+    margin:18px 0 0; text-align:center;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; color:#b0917f;
+  }
+  .card-actions{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+  .card-actions button{
+    font-family:var(--kai); font-size:13px; letter-spacing:.1em; color:#6d3b42;
+    padding:9px 16px; border-radius:999px; cursor:pointer;
+    background:rgba(255,255,255,.8); border:1px solid var(--line);
+    transition:background .18s, color .18s, transform .18s;
+  }
+  .card-actions button:hover{ background:#fff; color:#952f24; transform:translateY(-1px); }
+  .card-actions .primary{ background:var(--cinnabar); border-color:var(--cinnabar); color:#fdf3e4; }
+  .card-actions .primary:hover{ background:#93291f; color:#fff; }
+  .card-link{
+    display:block; width:fit-content; margin:16px auto 0;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+    color:#b08a76; text-decoration:none; border-bottom:1px solid transparent;
+    transition:color .18s, border-color .18s;
+  }
+  .card-link:hover{ color:var(--cinnabar); border-bottom-color:rgba(168,53,42,.35); }
+
+  .toast{
+    position:fixed; left:50%; bottom:36px; transform:translate(-50%,14px);
+    padding:10px 18px; border-radius:999px;
+    background:rgba(47,35,28,.9); color:#f8efe0;
+    font-family:var(--kai); font-size:13px; letter-spacing:.1em;
+    opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:30;
+  }
+  .toast.on{ opacity:1; transform:translate(-50%,0); }
+
+  footer{
+    margin-top:34px; text-align:center; color:#b0917f;
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+  }
+
+  @media (max-width:560px){
+    .row{ grid-template-columns:44px 1fr 14px; font-size:15.5px; padding:10px 6px; }
+    .card{ padding:40px 22px 20px; }
+    .card-actions{ gap:7px; }
+    .card-actions button{ padding:8px 13px; font-size:12.5px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card, .card-wrap, .row.tap{ animation:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="kicker">520 pieces of tenderness</p>
+      <h1>點一句，成一箋</h1>
+      <p class="sub">五百二十句，每一句都能單獨打開，單獨送人</p>
+      <div class="rule"></div>
+    </header>
+
+    <div class="tools">
+      <label class="search">
+        <input id="q" type="search" placeholder="搜一句，比如「雨」「晚安」" autocomplete="off" aria-label="搜索句子" />
+      </label>
+      <button id="btnRandom" type="button">隨機一句</button>
+    </div>
+
+    <ol class="list" id="list"></ol>
+    <p class="empty" id="empty" hidden>沒有找到這一句，換個字試試。</p>
+
+    <footer>五百二十顆 · 每一顆都有地址</footer>
+  </div>
+
+  <div class="card-wrap" id="cardWrap" hidden>
+    <div class="backdrop" id="backdrop"></div>
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="cardText">
+      <div class="seal" id="seal">001</div>
+      <p class="card-text" id="cardText">—</p>
+      <p class="card-meta" id="cardMeta">第 1 顆 · 共 520 顆</p>
+      <div class="card-actions">
+        <button class="primary" id="btnCopyText" type="button">複製這句</button>
+        <button id="btnCopyLink" type="button">複製這句的鏈接</button>
+        <button id="btnClose" type="button">合上</button>
+      </div>
+      <a class="card-link" id="cardLink" href="520長卷.html">在長卷裏看這一顆 ↗</a>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">已複製</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LINES = ["一心一意只喜歡你","成雙成對永不分離","三生三世鍾情於你","四季朝夕伴你身旁","五份溫柔全都給你","六時思念朝暮不休","七載風月唯念一人","八方奔赴只爲見你","長長久久相守到老","十全十美理想是你","一生一世一雙人","十二個月月月想你","一生相守不離不棄","一世溫柔贈予於你","十五月圓滿心是你","十六春秋歲歲相思","此情專一毫無二心","歲歲平安護你周全","長久偏愛獨屬於你","滿心歡喜，滿眼是你","二分明月都照向你","雙份牽掛繞成同心結","三更夢醒仍念你名","四季衣裳都念你冷暖","五嶽踏遍最想歸你","六根清淨唯你破例","七夕星河替你鋪路","八方來風都捎你消息","久處不厭纔是深情","三十分月色不及你","三生石上刻你姓名","三餐煙火與你共嘗","三寸光陰都想留住你","四海潮聲替我念你","五更天涼記得添衣","六月的雨像你溫柔","七分偏愛三分寵溺","八面玲瓏只對你笨","久伴不厭歲歲如新","四方食事與你同席","一心一意不是口號","雙人牀留你半邊","歲歲思念藏於心底","時時刻刻滿心是你","萬般溫柔只爲一人","前路漫漫伴你前行","滿心熱忱只爲愛你","朝朝暮暮不離不棄","長久深情永不更改","五十份愛意堆積溫柔","唯一偏愛自始至終","滿心歡喜皆是你","人間風月皆不如你","歲歲溫柔朝夕相守","雙倍思念加倍愛你","晨光爬上窗臺，我先把今天想成你的模樣","夜色落下時，替你收好一天的疲憊","雨天路滑，傘骨總往你那邊偏","風起衣薄，口袋先替你暖着","盛夏蟬鳴，冰水擰開才遞過去","路邊花開，第一眼就想告訴你","雲朵很軟，像你靠過來時的肩","海浪反覆，像我沒說夠的想念","山風穿林，替我輕輕抱你一下","老街糖炒栗子，熱乎那袋留你手裏","巷口小貓蹭人，我拍下它像你撒嬌","煎蛋邊緣焦脆，是你喜歡的火候","雞腿悄悄換到你碗裏，別聲張","最後一隻蝦剝好，蘸料也調好","草莓尖最甜，叉子轉向你","奶茶插好吸管，才推到你面前","西瓜中心那勺，勺子先遞你","橘子絡挑乾淨，一瓣瓣擺好","火鍋剛浮起的肉，第一筷歸你","夜宵面分兩碗，荷包蛋完整留你","你手涼，我口袋剛好空着","你肩沉，我這邊高度剛好","你心煩，我耳朵今天不關機","你笑起來，我眼睛就忘了移開","你掉眼淚，紙巾總比話先到","風大我走前頭，替你擋一點","雨急我靠外側，衣角溼了沒事","雪厚我先踩路，腳印給你留着","天熱瓶蓋先擰鬆，免得你費勁","天冷手心先搓熱，再碰你指尖","迷路別慌，我牽着你慢慢找","趕車別急，我放慢腳步等你","排隊辛苦，位置給你留着","人多擁擠，手臂替你隔出空間","分別回頭，我總比你多看一眼","花開我先說，怕你錯過春天","葉落我陪你走，踩碎一地秋天","初雪拍給你，附一句記得戴圍巾","晚霞顏色我說不清，就拍給你看","月圓那晚，我把窗邊位置留你","星星很多，我指最亮那顆給你","潮聲錄下來，你失眠時放給你聽","風起我先提醒，別又忘了外套","雲散天亮，第一條消息發給你","彩虹出現，我拉着你一起抬頭","你愛喫的店，我悄悄記在地圖","你怕冷的習慣，我寫進天氣提醒","你口味偏淡，我學調味時少放鹽","你不喫香菜，我點菜時先交代","你生日還遠，禮物已經開始挑","紀念日未到，提醒先設好","你隨口一提，我當成正經事辦","你話沒說完，我大概已經明白","你眉頭一皺，我先想哪裏沒做好","你眼睛一彎，我這一天就值了","不常逛的街，陪你走也很有趣","看不懂的展，聽你講就有意思","沒聽過的歌，你分享我就循環","沒走過的路，牽着你就不怕遠","等很久的車，聊着聊着就到站","排很長的隊，站在你後面也甘願","喫很晚的飯，熱一遍也等你","看很悶的片，你靠着我就能看完","聊很碎的天，東一句西一句也開心","做很傻的事，只要一起就不算傻","你忙你的，我把安靜留給你","你閒下來，我剛好有空陪你","你冷我遞外套，不多問","你熱我開風扇，風向朝你","你渴水杯遞到手邊","你餓竈臺馬上開火","你困我關燈，留一盞小夜燈","你醒我拉簾，讓陽光慢點進來","你笑我跟着笑，原因以後再說","你沉默我陪你坐，不催你開口","你的名字，寫在日記最常翻那頁","你的樣子，畫在便籤角落","你的聲音，設成專屬鈴聲","你的照片，放在錢包最裏層","你的消息，永遠置頂","你的語音，我反覆聽到會背","你的笑容，成了屏幕的光","你的喜好，拼成我的歌單","你的故事，我講給朋友聽","你的未來，我留了位置","人羣裏先找你的背影","街角等你，成了習慣","車站提前到，怕你等","電梯口多按一次開門","餐廳先點你愛喫的","超市順手拿你愛喝的","書店翻你提過的書","花店挑你喜歡的顏色","甜品店記住你的口味","便利店帶回你愛的糖","想念折成紙飛機，落在你窗邊","牽掛寫成小紙條，夾進你書裏","喜歡藏進早餐，煎蛋會說話","偏愛放進奶茶，甜度剛好","溫柔裹進圍巾，冬天不冷","守護撐進雨傘，雨點繞開你","陪伴煮進深夜，麪湯還熱","未來寫進計劃，每一頁有你","餘生安排在有你的城市","家佈置成你喜歡的顏色","你說冷，外套已經遞過去","你說餓，廚房立刻有動靜","你說累，熱水先放好","你說煩，手機調成靜音","你說想我，我出現在門口","你說看海，車票開始查","你說爬山，鞋帶先繫緊","你說安靜，我陪你坐着","你說聊天，我放下手裏事","你說想哭，我張開手","不喫香菜，我記得比菜單牢","怕黑，所以小燈常亮","愛甜，糖罐總在你夠得到的地方","喜靜，說話聲音自然放輕","怕冷，圍巾多備一條","愛花，路過花店會慢下來","暈車，靠窗位置先留你","戀舊，舊票根都收在盒裏","愛看晚霞，晴天傍晚就喊你","睡前喝水，杯子裏總留半杯溫的","你皺眉，我先想是不是我惹的","你嘆氣，我心裏跟着沉一下","你沉默，我靠近一點","你轉身，我腳步就跟上","你猶豫，我先問怎麼了","你害怕，我站到你前面","你開心，我偷偷記下原因","你難過，擁抱比道理先到","你成功，我鼓掌最大聲","你失敗，我陪你重來","早安當成鬧鐘，輕輕叫你","午安寫成便籤，貼在你桌上","晚安說成習慣，不說睡不着","早安吻落在額頭，不吵你","晚安故事講到你呼吸變慢","出門前叮囑，鑰匙手機帶好","回家後擁抱，先接住你","週末咖啡，按你口味做","假期行程，先問你意見","新年願望，第一條是你","春天風箏放高，線軸交你手裏","夏天螢火蟲捉到，放你掌心","秋天稻浪拍下，像金色海","冬天冰花指給你，窗上作畫","海邊日出等到了，先喊你看","山頂雲海守到了，風大靠我這邊","古鎮燈籠買下，掛你窗前","夜市煙火拍下，熱鬧分你一半","校園梧桐講給你，像講舊時光","故鄉小路走給你，盡頭是家","你走慢，我等你","你走快，我跟上","你停下，我陪你","你回頭，我在","你伸手，我牽","你靠肩，我穩","你說話，我聽","你不說，我懂","你笑，我暖","你哭，我疼","傘往你那邊斜，我淋一點沒事","外套往你肩上披，風大別着涼","座位往你旁邊留，人來人往也不換","菜單往你面前推，先挑喜歡的","遙控器遞給你，我看什麼都行","最後一塊蛋糕留你，奶油多那角","最舒服的枕頭讓給你，我睡低點","靠窗位置換給你，風景歸你","暖的那邊牀讓給你，我睡外側","甜的夢說給你，醒來先笑","醫院排隊我陪着，號我盯着","藥店買藥我記着，劑量問清楚","理髮店等多久都行，你好看最重要","菜場挑菜你拿主意，我負責拎","銀行取號我守着，你坐着等","車站接人我舉牌，怕你看不見","快遞站搬箱我來，重的不讓你碰","樓下散步慢慢走，路燈一盞盞亮","天台吹風帶外套，怕你冷","便利店買冰，先看你今天能不能喫","你愛看的電影，我記住片名","你愛聽的樂隊，我學會幾句","你愛穿的鞋，我走路會放慢","你愛背的包，我順手接過來","你愛喫的面，我學會煮","你愛喝的茶，水溫記着","你愛去的店，老闆都認識我們","你愛走的路，哪塊磚松我都知道","你愛看的雲，我抬頭就拍","你愛等的雨，我陪你在屋檐下","旅行清單第一行寫你","買菜清單順手多買你愛的","新年計劃裏留出陪你的時間","車票訂單兩個人名字挨着","照片牆中間留你的位置","備忘錄裏全是你的小事","歌單名字像沒說出口的話","日記頁腳寫今天也喜歡你","夢的開頭是你推門進來","醒來的結尾是還想見你","加班夜宵送到樓下，趁熱","早起早餐輕手輕腳，不吵醒你","出差查天氣，提醒你帶傘","回家留盞燈，樓道不黑","感冒煮薑茶，糖放少一點","咳嗽拍後背，水遞到嘴邊","失眠講故事，聲音放慢","做噩夢叫醒你，別怕我在","手腳涼，我暖着","胃不舒服，粥熬得軟爛","今天風很好，其實是想你","路邊貓像你，其實是想你","記得帶傘，其實是擔心","別太累，其實是心疼","剛好順路，其實是特意","我就在附近，其實是守着你","一起喫個飯，其實是想見你","下次還來，其實是想有下次","慢慢走，其實是想久一點","晚安，其實是把喜歡咽回去","瓶蓋擰不開，我來","箱子夠不到，我墊腳","鞋帶鬆了，我蹲下","衣領翻了，我順手理","嘴角有醬汁，我遞紙","湯太燙，我吹涼","袋子太重，我拎","密碼難記，我替你記","鑰匙丟了，我幫你找","約定快忘，我提醒","風大圍巾繞緊，別灌脖子","雨急傘柄握穩，我帶你走","雪厚腳印留下，跟着我","夜裏燈留着，回家不慌","霧大方向指清，手別松","橋上風景讓給你，我負責看你","海邊浪聲錄下，失眠時聽","山頂日出等到，冷就靠過來","車站擁抱留久一點，車還早","門口再見說輕點，怕捨不得","你喜歡的季節，我提前等","你喜歡的城市，我記熟地圖","你喜歡的餐廳，我排過號","你喜歡的歌，我學會唱","你喜歡的書，我讀兩遍","你喜歡的顏色，我記住色號","你喜歡的天氣，我每天查","你喜歡的節日，我提前備禮","你喜歡的早餐，我學做法","你喜歡的晚安，我每天說","先化的冰淇淋，我先喫掉那半","最後一塊巧克力，掰一半給你","最脆的餅乾，留整片","最甜的葡萄，剝好皮","最熱的包子，吹一吹再遞","最香的那口湯，勺子先給你","最軟的麪包，抹好果醬","最涼的那杯水，杯壁擦乾","最暖的那杯奶，試過溫度","最甜的糖，紙剝開","長夜熬着，我泡茶陪你","慢車等着，我講笑話","黑路走着，我牽緊","大雨淋着，傘再斜一點","冷風吹着，圍巾分你一半","暖陽曬着，影子挨着","擠隊排着，我擋前面","晚飯喫晚，菜熱着","很多話聊着，夜短了","平凡日子過着，有你就好","疲憊分我一半，別硬撐","難過說給我聽，別悶着","壓力先放下，天塌不了","委屈別吞，我站你這邊","不安收起來，我在","快樂放大，笑出聲","笑容延長，拍照留","心事收冊，鎖好","願望列單，一個個來","未來留白，寫你名字","清晨拉簾，讓光慢點","午後風扇，調到你舒服","傍晚晚霞，指給你看","夜裏燈光，不刺眼","睡前水杯，放牀頭","出門鑰匙，放包裏","回家拖鞋，擺腳邊","喫飯椅子，拉到身旁","散步步子，跟你節奏","聊天手機，扣在桌上","你笑，我偷偷看","你認真，我悄悄記","你發呆，我陪着坐","你忙碌，我不打擾","你委屈，我先抱","你生氣，我先哄","你猶豫，我先等","你決定，我先支持","你回頭，我先笑","你伸手，我先牽","春天柳枝編環，戴你頭上","夏天荷葉折傘，遮你額前","秋天楓葉夾書，做你書籤","冬天枯枝插瓶，放你桌邊","海邊細沙裝瓶，貼標籤","山間清泉灌杯，給你嘗","古鎮明信片寫滿，寄給你","夜市糖人買下，像你笑","校園桂花收囊，掛你包","故鄉月亮拍下，發給你","你冷暖氣調高，毯子遞上","你熱空調調低，風扇也開","你餓冰箱翻遍，先找食材","你渴水杯遞上，水溫試過","你困燈關小，門帶上","你醒早餐熱好，碗擺好","你忙話縮短，不添亂","你閒時間拉長，陪你逛","你煩音樂放輕，窗開一點","你累肩膀放低，靠過來","雨天走成散步，慢一點","雪天堆個雪人，像你","晴天曬好被子，有太陽味","陰天看場電影，窩沙發","大風天煮火鍋，關窗","酷暑切西瓜，最中間給你","寒冬熬熱湯，先盛一碗","平凡日過成節日，買小花","普通飯做成儀式，擺盤","舊時光翻相冊，笑出聲","枕頭高度記着，買同款","被子厚度記着，換季曬","房間溫度記着，提前調","燈光亮度記着，換暖泡","早餐搭配記着，不重樣","散步路線記着，避開吵","週末安排記着，留半天","旅行節奏記着，不趕路","說話方式記着，先聽你","沉默距離記着，不逼問","進門接包，順手掛好","坐下倒水，溫的","換鞋擺拖鞋，鞋尖朝外","洗手遞毛巾，乾的","喫飯先夾菜，你愛的","出門看天氣，傘帶上","上車拉車門，手護頂","下車等一步，怕你絆","上樓先開燈，樓道亮","睡覺關窗，風別直吹","想念藏早安，每天準時","牽掛藏飯點，問你喫了沒","喜歡藏順路，其實繞了遠","偏愛藏隨你，其實早想好","守護藏我在，其實沒走遠","陪伴藏晚安，其實還想聊","未來藏車票，目的地有你","餘生藏散步，路長一點","承諾藏小事，說到做到","真心藏日常，不用提醒","藥喫完，水遞上","水喝完，杯收走","飯喫完，碗我洗","路走完，到樓下","話說完，我記住","劇看完，字幕等","雨等完，傘收好","隊排完，位置讓你先走","夜熬完，天亮了","平凡過完，明天繼續","怕冷，被角掖好","怕熱，扇子搖好","怕黑，小燈開着","怕吵，門窗關好","怕遠，車票買好","怕累，行程排松","怕忘，提醒設好","怕等，時間提前","怕孤單，電話開着","怕錯過，日子記牢","雞蛋熟度，按你口味","米飯軟硬，按你習慣","湯的鹹淡，先嚐一口","甜點糖度，剛剛好","咖啡溫度，適口才遞","奶茶冰量，少冰記着","水果塊狀，大小一致","麪包顏色，烤到金黃","麪條筋道，不軟爛","餃子餡料，你愛的那款","你笑，我陪到岔氣","你鬧，我陪到天黑","你唱，我陪到跑調","你跳，我陪到腳痠","你走，我陪到腿軟","你坐，我陪到打烊","你喫，我陪到撐","你玩，我陪到盡興","你睡，我陪到自然醒","你夢，我陪到天亮","週末陽光留你，曬被子","假期咖啡留你，慢慢喝","旅行照片留你，洗出來","電影票根留你，做書籤","招牌菜留你，下次點","花店新花留你，帶回家","書店新書留你，先翻","海邊貝殼留你，聽海","山頂涼風留你，吹散煩","新年祝福留你，第一句","你忙，消息靜音","你閒，話題備好","你累，熱水放好","你煩，音樂調輕","你餓，外賣點好","你冷，外套烘暖","你熱，風扇轉向","你困，枕頭拍松","你醒，窗簾拉開","你出門，雨傘遞上","歌單命名成你，只有我懂","路線標成你家，常走的","天氣添加你的城市，每天看","日曆提醒你的日子，提前備","相冊封面你的笑，一打開就暖","聊天背景你的畫，看不夠","錢包夾層你的位置，空着等","書桌角落你的禮物，擺正","冰箱貼你買的，捨不得換","鑰匙扣你送的，舊了也帶","等雨停，一起聽屋檐","等花開，一起數日子","等車來，一起看站牌","等飯熟，一起聞香味","等電話，一起猜是誰","等消息，一起盯着屏","等日落，一起坐長椅","等雪落，一起哈白氣","等假期，一起做計劃","等未來，一起慢慢來","枕頭記着買，同款","杯子記着洗，你愛用","毛巾記着換，軟的","拖鞋記着擺，成雙","零食記着補，你愛那包","牙膏記着囤，薄荷味","洗髮水記着買，你習慣","洗衣液記着添，淡香","垃圾袋記着換，順手","日用品記着備，不用你操心","風鈴掛窗邊，風來像你笑","綠植擺桌角，抬頭就見綠","香薰放牀頭，睡得安穩","暖燈裝書桌，夜裏不冷","毛毯鋪沙發，窩着看劇","靠墊放椅背，腰不酸","花瓶擺餐桌，喫飯有花","相框掛牆上，一進門就看見","便利貼貼鏡前，每天一句早安","這一生不求驚天動地，只求慢慢交給你"];
+
+  var listEl = document.getElementById("list");
+  var emptyEl = document.getElementById("empty");
+  var qEl = document.getElementById("q");
+  var wrapEl = document.getElementById("cardWrap");
+  var sealEl = document.getElementById("seal");
+  var textEl = document.getElementById("cardText");
+  var metaEl = document.getElementById("cardMeta");
+  var toastEl = document.getElementById("toast");
+  var cardLink = document.getElementById("cardLink");
+
+  var current = -1;
+  var rows = [];
+  var openTimer = 0;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function pad(n) { var s = String(n); while (s.length < 3) s = "0" + s; return s; }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  /* ================= 花瓣特效 ================= */
+  var fxCanvas = document.getElementById("fx");
+  var fx = fxCanvas.getContext("2d");
+  var petals = [];
+  var rafId = 0;
+  var lastT = 0;
+
+  function fxResize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    fxCanvas.width = Math.round(window.innerWidth * dpr);
+    fxCanvas.height = Math.round(window.innerHeight * dpr);
+    fxCanvas.style.width = window.innerWidth + "px";
+    fxCanvas.style.height = window.innerHeight + "px";
+    fx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // 花瓣從指尖上方飄落
+  function burst(x, y) {
+    if (reduce) return;
+    var n = 18;
+    for (var i = 0; i < n; i++) {
+      petals.push({
+        x: x + (Math.random() - 0.5) * 300,
+        y: y - 60 - Math.random() * 260,
+        vx: (Math.random() - 0.5) * 26,
+        vy: 46 + Math.random() * 74,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 2.4,
+        sway: Math.random() * Math.PI * 2,
+        swayAmp: 10 + Math.random() * 26,
+        size: 6 + Math.random() * 7,
+        tilt: 0.35 + Math.random() * 0.5,
+        life: 0,
+        ttl: 1.3 + Math.random() * 0.9,
+        hue: Math.random()
+      });
+    }
+    if (!rafId) { lastT = performance.now(); rafId = requestAnimationFrame(loopFx); }
+  }
+
+  function drawPetal(p, a) {
+    fx.save();
+    fx.translate(p.x, p.y);
+    fx.rotate(p.rot);
+    fx.scale(1, p.tilt);
+    fx.globalAlpha = a;
+
+    var g = fx.createRadialGradient(-p.size * 0.3, -p.size * 0.3, p.size * 0.1, 0, 0, p.size);
+    if (p.hue < 0.55) {
+      g.addColorStop(0, "#ffe3e6");
+      g.addColorStop(0.6, "#f6bcc4");
+      g.addColorStop(1, "#e6949f");
+    } else {
+      g.addColorStop(0, "#fff0e6");
+      g.addColorStop(0.6, "#f7d3c4");
+      g.addColorStop(1, "#e8ad9c");
+    }
+    fx.fillStyle = g;
+    fx.beginPath();
+    fx.ellipse(0, 0, p.size, p.size * 0.62, 0, 0, Math.PI * 2);
+    fx.fill();
+
+    // 花瓣的脈絡
+    fx.globalAlpha = a * 0.35;
+    fx.strokeStyle = "#c9767f";
+    fx.lineWidth = 0.8;
+    fx.beginPath();
+    fx.moveTo(-p.size * 0.7, 0);
+    fx.quadraticCurveTo(0, p.size * 0.18, p.size * 0.7, 0);
+    fx.stroke();
+
+    fx.restore();
+    fx.globalAlpha = 1;
+  }
+
+  function loopFx(t) {
+    var dt = Math.min((t - lastT) / 1000, 0.05);
+    lastT = t;
+    fx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (var i = petals.length - 1; i >= 0; i--) {
+      var p = petals[i];
+      p.life += dt;
+      if (p.life >= p.ttl || p.y > window.innerHeight + 40) { petals.splice(i, 1); continue; }
+
+      p.sway += dt * 1.6;
+      p.vx += Math.cos(p.sway) * p.swayAmp * dt * 2.2;
+      p.vx *= 0.985;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.rot += p.vr * dt;
+
+      var k = p.life / p.ttl;
+      var a = Math.min(1, k * 6) * (1 - Math.pow(k, 3));
+      drawPetal(p, a * 0.92);
+    }
+
+    if (petals.length) {
+      rafId = requestAnimationFrame(loopFx);
+    } else {
+      rafId = 0;
+      fx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+  }
+
+  window.addEventListener("resize", fxResize);
+
+  /* ================= 目錄 ================= */
+  function build() {
+    var html = "";
+    for (var i = 0; i < LINES.length; i++) {
+      html += '<li><button class="row" type="button" data-i="' + i + '">' +
+              '<span class="no">' + pad(i + 1) + "</span>" +
+              '<span class="tx">' + esc(LINES[i]) + "</span>" +
+              '<span class="go" aria-hidden="true">↗</span></button></li>';
+    }
+    listEl.innerHTML = html;
+    rows = Array.prototype.slice.call(listEl.querySelectorAll(".row"));
+  }
+
+  /* ================= 箋 ================= */
+  // 逐字浮現
+  function writeText(str) {
+    textEl.textContent = "";
+    if (reduce) { textEl.textContent = str; return; }
+    for (var i = 0; i < str.length; i++) {
+      var s = document.createElement("span");
+      s.className = "ch";
+      s.textContent = str.charAt(i);
+      s.style.animationDelay = (0.26 + i * 0.045).toFixed(3) + "s";
+      textEl.appendChild(s);
+    }
+  }
+
+  function open(i, x, y) {
+    if (i < 0 || i >= LINES.length) return;
+    var wasOpen = !wrapEl.hidden;
+    current = i;
+    sealEl.textContent = pad(i + 1);
+    writeText(LINES[i]);
+    metaEl.textContent = "第 " + (i + 1) + " 顆 · 共 " + LINES.length + " 顆";
+    if (cardLink) cardLink.href = "520長卷.html#" + (i + 1);
+
+    for (var k = 0; k < rows.length; k++) {
+      rows[k].classList.toggle("is-cur", Number(rows[k].dataset.i) === i);
+    }
+
+    // 先亮遮罩（火花在上面飛），再讓箋浮上來
+    clearTimeout(openTimer);
+    wrapEl.hidden = false;
+
+    if (typeof x === "number" && typeof y === "number") {
+      burst(x, y);
+    } else {
+      var r = rows[i].getBoundingClientRect();
+      burst(r.left + 40, r.top + r.height / 2);
+    }
+
+    if (wasOpen || reduce) {
+      wrapEl.classList.add("ready");
+    } else {
+      wrapEl.classList.remove("ready");
+      openTimer = setTimeout(function () { wrapEl.classList.add("ready"); }, 300);
+    }
+
+    if (history.replaceState) {
+      history.replaceState(null, "", "#" + (i + 1));
+    } else {
+      location.hash = String(i + 1);
+    }
+    document.title = LINES[i] + " · 520顆愛意";
+  }
+
+  function close() {
+    clearTimeout(openTimer);
+    wrapEl.classList.remove("ready");
+    wrapEl.hidden = true;
+    current = -1;
+    for (var k = 0; k < rows.length; k++) rows[k].classList.remove("is-cur");
+    if (history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+    document.title = "520顆愛意 · 點一句，成一箋";
+  }
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("on");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { toastEl.classList.remove("on"); }, 1500);
+  }
+
+  function copy(str, okMsg) {
+    var done = function () { toast(okMsg); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(str).then(done, function () { fallback(str, done); });
+    } else {
+      fallback(str, done);
+    }
+  }
+
+  function fallback(str, done) {
+    var ta = document.createElement("textarea");
+    ta.value = str;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { toast("複製失敗，長按選中吧"); }
+    ta.remove();
+  }
+
+  function linkOf(i) {
+    return location.origin + location.pathname + "#" + (i + 1);
+  }
+
+  /* ================= 事件 ================= */
+  listEl.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest(".row") : null;
+    if (!btn) return;
+    btn.classList.remove("tap");
+    void btn.offsetWidth;
+    btn.classList.add("tap");
+    open(Number(btn.dataset.i), e.clientX, e.clientY);
+  });
+
+  document.getElementById("btnClose").addEventListener("click", close);
+  wrapEl.addEventListener("click", function (e) { if (e.target === wrapEl) close(); });
+
+  document.getElementById("btnCopyText").addEventListener("click", function () {
+    if (current >= 0) copy(LINES[current], "這句已經複製好了");
+  });
+  document.getElementById("btnCopyLink").addEventListener("click", function () {
+    if (current >= 0) copy(linkOf(current), "鏈接已複製，發給TA試試");
+  });
+
+  document.getElementById("btnRandom").addEventListener("click", function (e) {
+    var r = e.currentTarget.getBoundingClientRect();
+    open(Math.floor(Math.random() * LINES.length), r.left + r.width / 2, r.top + r.height / 2);
+  });
+
+  window.addEventListener("keydown", function (e) {
+    if (!wrapEl.hidden) {
+      if (e.key === "Escape") { close(); }
+      else if (e.key === "ArrowRight") { open((current + 1) % LINES.length); }
+      else if (e.key === "ArrowLeft") { open((current - 1 + LINES.length) % LINES.length); }
+    }
+  });
+
+  qEl.addEventListener("input", function () {
+    var q = qEl.value.trim();
+    var shown = 0;
+    for (var k = 0; k < rows.length; k++) {
+      var hit = !q || rows[k].querySelector(".tx").textContent.indexOf(q) >= 0;
+      rows[k].parentNode.style.display = hit ? "" : "none";
+      if (hit) shown++;
+    }
+    emptyEl.hidden = shown > 0;
+  });
+
+  /* ================= 深鏈接 ================= */
+  function fromHash() {
+    var m = /^#(\d+)$/.exec(location.hash || "");
+    if (!m) return false;
+    var n = parseInt(m[1], 10);
+    if (n >= 1 && n <= LINES.length) { open(n - 1); return true; }
+    return false;
+  }
+
+  window.addEventListener("hashchange", function () {
+    if (!fromHash()) close();
+  });
+
+  fxResize();
+  build();
+  if (fromHash()) {
+    var r0 = rows[current] && rows[current].getBoundingClientRect();
+    if (r0) burst(r0.left + 40, r0.top + r0.height / 2);
+  }
+})();
+</script>
+</body>
+</html>
